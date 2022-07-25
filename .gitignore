@@ -1,0 +1,9 @@
+**/*.csv
+**/*.jpg
+**/*.mp4
+**/*.png
+**/*.xml
+**/*.pyc
+**/venv
+**/.devcontainer
+**/.DS_Store
