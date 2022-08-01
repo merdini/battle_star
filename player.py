@@ -78,7 +78,7 @@ class Player:
           if eval(f'{nonzero_count} {sign} {threshold}'):
             self.up_targets_this_frame += 1
             color = (0, 255, 0)
-            thickness = 2
+            thickness = 1
           else:
             self.down_targets_this_frame += 1
             self.targets.at[idx, "is_down"] = True
@@ -108,9 +108,6 @@ class Player:
     if self.is_all_down and self.up_targets_this_frame > 20:  
       self.is_all_down = False
       self.targets["is_down"] = False
-
-
-
 
 
 if __name__ == "__main__":

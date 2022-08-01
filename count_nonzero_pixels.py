@@ -2,7 +2,7 @@ import cv2
 import pandas as pd
 import numpy as np
 from params import cam_pos
-from bbox import count_nonzero_pixels
+
 # from glare import remove_glare
 # from quantize import quantize_image
 
@@ -35,7 +35,6 @@ def create_target_position_df(position_list):
     df = pd.DataFrame(columns=["box_num", "x1", "y1", "x2", "y2"], data=box_list)
     return df
 
-
 def img_nonzero_pixels(img, df, new_col_name):
     nonzero_list = []
     for idx, rows in df.iterrows():
@@ -45,6 +44,12 @@ def img_nonzero_pixels(img, df, new_col_name):
         nonzero_list.append(nonzero)
     
     df[new_col_name] = nonzero_list
+
+
+def count_nonzero_pixels(img, x1,y1,x2,y2):
+    img_crop = img[y1:y2, x1:x2]
+    num_nonzero = cv2.countNonZero(img_crop)
+    return num_nonzero
 
 
 def count_zero_pixels(img, x1,y1,x2,y2):
@@ -69,6 +74,8 @@ def get_nonzero_pixel_thresholds():
     df["diff"] = df["up_nonzero_cnt"] - df["down_nonzero_cnt"]
     df["box_num"] = range(1, df.shape[0]+1)
     df["is_down"] = False
+    df["abs_diff"] = abs(df["diff"])
+    df.sort_values('abs_diff', inplace=True)
     df.to_csv(f"vid_target_positions.csv", index=False)
 
 if __name__ == "__main__":
