@@ -1,6 +1,7 @@
 import cvzone
 import cv2
 import pandas as pd
+import time
 
 from region import Region
 from count_nonzero_pixels import apply_adaptive_threshold
@@ -21,6 +22,8 @@ class Player:
       self.no = Player.counter
       self.is_all_down = False
       self.completed_times = 0 
+      self.start_time = None
+      self.end_time = None
     
   
   def update_is_down_status(self):
@@ -68,6 +71,7 @@ class Player:
         x1, y1, x2, y2, up_cnt, down_cnt = rows[["x1", "y1", "x2", "y2", "up_nonzero_cnt", "down_nonzero_cnt"]]
         img_crop = dilated_img[y1:y2, x1:x2]
         nonzero_count = cv2.countNonZero(img_crop)
+        
         if not rows["is_down"]:
           threshold = (up_cnt + down_cnt) // 2
           if up_cnt > down_cnt:
@@ -85,13 +89,16 @@ class Player:
             color = (0, 0, 255)
             thickness = 1
 
+            if self.start_time:
+              self.end_time = time.time()
+
           self.update_shot_this_session()
+          if not self.start_time and self.shot_this_session == 1:
+            self.start_time = time.time()
           if self.targets["is_down"].sum() > 0 and self.targets["is_down"].sum() % 30 == 0:
             self.is_all_down = True
             
             self.update_completed_times()
-          # else: 
-          #   self.update_shot_this_session()
         else:
           color = (0, 0, 255)
           thickness = 1 
@@ -108,6 +115,8 @@ class Player:
     if self.is_all_down and self.up_targets_this_frame > 20:  
       self.is_all_down = False
       self.targets["is_down"] = False
+    
+    
 
 
 if __name__ == "__main__":
