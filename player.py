@@ -24,6 +24,7 @@ class Player:
       self.completed_times = 0 
       self.start_time = None
       self.end_time = None
+      self.pause = False
     
   
   def update_is_down_status(self):
@@ -31,6 +32,7 @@ class Player:
     
   def reset_shot_this_session(self):
     self.completed_times = 0
+    self.start_time = time.time()
   
   def update_shot_this_session(self):
     self.shot_this_session = self.completed_times * 30 + self.targets["is_down"].sum()
@@ -53,11 +55,13 @@ class Player:
               x1, y1, x2, y2, up_cnt, down_cnt = rows[["x1", "y1", "x2", "y2", "up_nonzero_cnt", "down_nonzero_cnt"]]
               img_crop = dilated_img[y1:y2, x1:x2]
               nonzero_count = cv2.countNonZero(img_crop)
-              threshold = (up_cnt + down_cnt) // 2
+              threshold = (up_cnt + down_cnt) // 2 
               if up_cnt > down_cnt:
                   sign = '>'
+                  threshold -= 15
               else:
                   sign = '<'
+                  threshold += 15
 
               if eval(f'{nonzero_count} {sign} {threshold}'):
                   self.up_targets_this_frame += 1
@@ -66,6 +70,9 @@ class Player:
   def check_targets(self, dilated_img, img, draw=True):
     self.up_targets_this_frame = 0
     self.down_targets_this_frame = 0
+    if self.pause and self.tick < 150:
+      self.tick += 1
+      return
     if not self.is_all_down:  
       for idx, rows in self.targets.iterrows():
         x1, y1, x2, y2, up_cnt, down_cnt = rows[["x1", "y1", "x2", "y2", "up_nonzero_cnt", "down_nonzero_cnt"]]
@@ -73,11 +80,13 @@ class Player:
         nonzero_count = cv2.countNonZero(img_crop)
         
         if not rows["is_down"]:
-          threshold = (up_cnt + down_cnt) // 2
+          threshold = (up_cnt + down_cnt) // 2 - 10
           if up_cnt > down_cnt:
-            sign = '>'
+              sign = '>'
+              threshold -= 15
           else:
-            sign = '<'
+              sign = '<'
+              threshold += 15
 
           if eval(f'{nonzero_count} {sign} {threshold}'):
             self.up_targets_this_frame += 1
@@ -112,9 +121,11 @@ class Player:
     else:
       self.count_up_targets(dilated_img)
     # TODO: repalce value 20 with 30
-    if self.is_all_down and self.up_targets_this_frame > 20:  
+    if self.is_all_down and self.up_targets_this_frame == 30:  
       self.is_all_down = False
       self.targets["is_down"] = False
+      self.pause = True
+      self.tick = 0
     
     
 

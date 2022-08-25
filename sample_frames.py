@@ -6,7 +6,7 @@ from params import width, height
 
 
 def get_target_up_and_down_frames():
-    cap = cv2.VideoCapture(f'output_new_cam.mp4')
+    cap = cv2.VideoCapture(f'output.mp4')
     if (cap.isOpened()== False): 
         print("Error opening video stream or file")
 
@@ -19,9 +19,9 @@ def get_target_up_and_down_frames():
         frame = cv2.resize(frame, (width, height))
         print(frame_no)
         if ret:
-            if frame_no == 10:
+            if frame_no == 50:
                 cv2.imwrite(f'targets_up.jpg', frame)
-            elif frame_no == total_frames - 10:
+            elif frame_no == total_frames - 20:
                 cv2.imwrite(f'targets_down.jpg', frame)
             # Press Q on keyboard to  exit
             if cv2.waitKey(1) & 0xFF == ord('q'):

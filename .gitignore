@@ -5,6 +5,7 @@
 **/*.xml
 **/*.pyc
 **/venv
+**/.venv
 **/.devcontainer
 **/.DS_Store
 **/.vscode

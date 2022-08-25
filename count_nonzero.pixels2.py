@@ -1,10 +1,10 @@
+from asyncio.streams import FlowControlMixin
 import cv2
 import pandas as pd
 import numpy as np
 from params import cam_pos
+from params import width, height
 
-# from glare import remove_glare
-# from quantize import quantize_image
 
 
 
@@ -40,10 +40,10 @@ def img_nonzero_pixels(img, df, new_col_name):
     for idx, rows in df.iterrows():
         x1, y1, x2, y2 = rows[["x1", "y1", "x2", "y2"]]
         nonzero = count_nonzero_pixels(img, x1, y1, x2, y2)
-        nonzero_list.append(nonzero)
-    
-    df[new_col_name] = nonzero_list
-
+        if column_name == "up_nonzero_cnt":
+            df.loc[idx, new_col_name] = nonzero if nonzero < df.loc[idx, new_col_name] else df.loc[idx, new_col_name]
+        elif column_name == "down_nonzero_cnt":
+            df.loc[idx, new_col_name] = nonzero if nonzero > df.loc[idx, new_col_name] else df.loc[idx, new_col_name]
 
 def count_nonzero_pixels(img, x1,y1,x2,y2):
     img_crop = img[y1:y2, x1:x2]
@@ -59,16 +59,47 @@ def count_zero_pixels(img, x1,y1,x2,y2):
     return zero_pix
 
 
-def get_nonzero_pixel_thresholds():
-    df = pd.read_csv(f"vid_target_positions.csv")
+def get_nonzero_pixel_thresholds(df, img, column_name):
+    
 
-    img = cv2.imread(f'targets_up.jpg')
     img_dilated = apply_adaptive_threshold(img, "up", True)
-    img_nonzero_pixels(img_dilated, df, "up_nonzero_cnt")
+    
+    img_nonzero_pixels(img_dilated, df, column_name)
 
-    img = cv2.imread(f'targets_down.jpg')
-    img_dilated = apply_adaptive_threshold(img, "down", True)
-    img_nonzero_pixels(img_dilated, df, "down_nonzero_cnt")
+
+    # df["diff"] = df["up_nonzero_cnt"] - df["down_nonzero_cnt"]
+    df["box_num"] = range(1, df.shape[0]+1)
+    
+
+
+
+if __name__ == "__main__":
+    df = pd.read_csv(f"vid_target_positions.csv", dtype='Int16')
+    df["up_nonzero_cnt"] = float('Inf')
+    df["down_nonzero_cnt"] = float('-Inf')
+    last_frame_no = 100
+    cap = cv2.VideoCapture('output.mp4')
+    total_frames = (cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    frame_no = 0
+    while True:
+        _, img = cap.read()
+        frame_no += 1
+        print(frame_no)
+        if frame_no < 100:
+            cv2.imwrite(f'targets_up.jpg', img)
+        elif frame_no > total_frames - 100:
+            cv2.imwrite(f'targets_down.jpg', img)
+        
+        if frame_no < 10:
+            column_name = "up_nonzero_cnt"
+        elif 1720 < frame_no < 1780:
+            column_name = "down_nonzero_cnt"
+        elif frame_no > 1780:
+            break
+        else:
+            continue
+        img = cv2.resize(img, (width, height))
+        get_nonzero_pixel_thresholds(df, img, column_name)
 
     df["diff"] = df["up_nonzero_cnt"] - df["down_nonzero_cnt"]
     df["box_num"] = range(1, df.shape[0]+1)
@@ -76,15 +107,3 @@ def get_nonzero_pixel_thresholds():
     df["abs_diff"] = abs(df["diff"])
     df.sort_values('abs_diff', inplace=True)
     df.to_csv(f"vid_target_positions.csv", index=False)
-
-if __name__ == "__main__":
-    get_nonzero_pixel_thresholds()
-    img = cv2.imread(f'targets_up.jpg')
-    # img = remove_glare(img)
-    # img = quantize_image(img, 8)
-    img_dilated = apply_adaptive_threshold(img, "up", True)
-    img = cv2.imread(f'targets_down.jpg')
-    # img = remove_glare(img)
-    # img = quantize_image(img, 8)
-    img_dilated = apply_adaptive_threshold(img, "down", True)
-    

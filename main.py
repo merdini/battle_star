@@ -28,8 +28,10 @@ monthly_records.sort_values(by=['shot', 'time'], inplace=True, ascending=[False,
 
 def main(source, dev=False):
   global current_frame, players_list
-  bg = np.zeros([screen_height, screen_width])
-  bg.fill(255)
+  # bg = np.zeros([screen_height, screen_width])
+  # bg.fill(255)
+  bg = cv2.imread('webb.jpg')
+  bg = cv2.resize(bg, (screen_width, screen_height))
   try:
     df = pd.read_csv(f"region_positions.csv")
     region_list = df[["region_no", "x1", "y1", "x2", "y2"]].values.tolist()
@@ -38,7 +40,7 @@ def main(source, dev=False):
 
 
   color = (0, 0, 255)
-  cvzone.putTextRect(bg, f"All time best shooters", (screen_width - 700, 50), scale=2, thickness=2, offset=0, colorR=color)
+  cvzone.putTextRect(bg, f"All time best shooters", (screen_width // 2 -300, 50), scale=2, thickness=2, offset=0, colorR=color)
   for idx, rows in all_time_record.iterrows():
     if idx > 9:
       break
@@ -50,7 +52,7 @@ def main(source, dev=False):
     # cv2.rectangle(bg, (x1, y1), (x2, y2), color, 2)
     cvzone.putTextRect(bg, f"{rows['name']:15}: {rows['shot']:4} {rows['time']:.2f} sec", (x1, y2-3), scale=2, thickness=2, offset=0, colorR=color)
 
-  cvzone.putTextRect(bg, f"This month best shooters", (screen_width - 1500, 50), scale=2, thickness=2, offset=0, colorR=color)
+  cvzone.putTextRect(bg, f"This month best shooters", (screen_width//2 + 300, 50), scale=2, thickness=2, offset=0, colorR=color)
   for idx, rows in monthly_records.iterrows():
     if idx > 9:
       break
@@ -69,7 +71,7 @@ def main(source, dev=False):
   if source == 0:
     cap = cv2.VideoCapture(0)
   elif source == 1:
-    cap = cv2.VideoCapture('output_new_cam.mp4')
+    cap = cv2.VideoCapture('output.mp4')
 
   if (cap.isOpened()== False): 
     print("Error opening video stream or file")
@@ -83,6 +85,7 @@ def main(source, dev=False):
       cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     _, img = cap.read()
     img = cv2.resize(img, (width, height))
+    print(frame_no)
     if frame_no % 5 != 0:
       frame_no += 1
       continue
@@ -95,17 +98,21 @@ def main(source, dev=False):
         text_region_x = player.region.x1
         text_region_y = 50
         scale = 2
+        time_text_region_y = text_region_y+50
       else:
         frame = bg
         text_region_x = 0
         text_region_y = int(idx * (screen_height / num_player) + (screen_height / num_player)/2)
+        time_text_region_y = text_region_y+70
         scale = 5
       if player.end_time:
         elapsed_time = (player.end_time - player.start_time)
       else:
         elapsed_time = 0
-      cvzone.putTextRect(frame, f'{player}: {player.shot_this_session} Time: {elapsed_time:.2f} sec', (text_region_x, text_region_y), scale=scale,
+      cvzone.putTextRect(frame, f'{player}: {player.shot_this_session}', (text_region_x, text_region_y), scale=scale,
                       thickness=5, offset=20, colorR=(0,200,0))
+      cvzone.putTextRect(frame, f'Time: {elapsed_time:.2f} sec', (text_region_x, time_text_region_y), scale=scale,
+      thickness=5, offset=20, colorR=(0,200,0))
     
     pick_winner(players_list, img)
     if dev:
@@ -122,20 +129,22 @@ def renew_session(event, x, y, flags, param):
     empty_frame = np.zeros([screen_height, screen_width])
     empty_frame.fill(255)
     counter += 1
-    cv2.namedWindow(winname= "Renew Session")
-    if flags == cv2.EVENT_FLAG_RBUTTON + cv2.EVENT_FLAG_SHIFTKEY:
-      for player in players_list:
-        
-        print('resetting session', counter)
-        cvzone.putTextRect(empty_frame, 'Session is Renewed', (600, 700), scale=5,
-                          thickness=5, offset=20, colorR=(0,0,255))
-        cv2.imshow("Renew Session", empty_frame)
-        cv2.waitKey(5)
-        player.reset_shot_this_session()
     
-    cv2.destroyWindow("Renew Session")
-    update_all_time_records(players_list)
-    update_monthly_time_records(players_list)
+    if flags == cv2.EVENT_FLAG_RBUTTON + cv2.EVENT_FLAG_SHIFTKEY:
+      
+
+      for player in players_list:
+        print('resetting session', counter)
+        player.reset_shot_this_session()
+      
+      cv2.namedWindow(winname= "Renew Session")
+      cvzone.putTextRect(empty_frame, 'Session is Renewed', (600, 700), scale=5,
+                            thickness=5, offset=20, colorR=(0,0,255))
+      cv2.imshow("Renew Session", empty_frame)
+      cv2.waitKey(5000)
+      cv2.destroyWindow("Renew Session")
+      update_all_time_records(players_list)
+      update_monthly_time_records(players_list)
       
 def update_all_time_records():
   pass
@@ -170,4 +179,4 @@ def pick_winner(players, img):
 
 
 if __name__ == "__main__":
-    main(source=1)
+    main(source=1, dev=True)
