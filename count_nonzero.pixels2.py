@@ -86,16 +86,11 @@ if __name__ == "__main__":
         frame_no += 1
         print(frame_no)
         if frame_no < 100:
-            cv2.imwrite(f'targets_up.jpg', img)
-        elif frame_no > total_frames - 100:
-            cv2.imwrite(f'targets_down.jpg', img)
-        
-        if frame_no < 10:
             column_name = "up_nonzero_cnt"
-        elif 1720 < frame_no < 1780:
-            column_name = "down_nonzero_cnt"
-        elif frame_no > 1780:
+        elif frame_no == total_frames:
             break
+        elif frame_no > total_frames - 100:
+            column_name = "down_nonzero_cnt"
         else:
             continue
         img = cv2.resize(img, (width, height))

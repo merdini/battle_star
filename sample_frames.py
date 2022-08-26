@@ -19,7 +19,7 @@ def get_target_up_and_down_frames():
         frame = cv2.resize(frame, (width, height))
         print(frame_no)
         if ret:
-            if frame_no == 50:
+            if frame_no == 100:
                 cv2.imwrite(f'targets_up.jpg', frame)
             elif frame_no == total_frames - 20:
                 cv2.imwrite(f'targets_down.jpg', frame)

@@ -32,7 +32,9 @@ class Player:
     
   def reset_shot_this_session(self):
     self.completed_times = 0
-    self.start_time = time.time()
+    self.targets["is_down"] = False
+    self.start_time = None
+    self.end_time = None
   
   def update_shot_this_session(self):
     self.shot_this_session = self.completed_times * 30 + self.targets["is_down"].sum()
@@ -70,7 +72,7 @@ class Player:
   def check_targets(self, dilated_img, img, draw=True):
     self.up_targets_this_frame = 0
     self.down_targets_this_frame = 0
-    if self.pause and self.tick < 150:
+    if self.pause and self.tick < 200:
       self.tick += 1
       return
     if not self.is_all_down:  
