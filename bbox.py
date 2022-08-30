@@ -70,9 +70,6 @@ def draw_reactangle_with_drag(event, x, y, flags, param):
                     counter -= 1
 
 
-    # df = pd.DataFrame(columns=["box_num", "x1", "y1", "x2", "y2"], data=position_list)
-    # df.to_csv("vid_target_positions.csv", index=False)
-
     with open(f'vid_target_positions.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(["box_num", "x1", "y1", "x2", "y2"])
@@ -115,7 +112,7 @@ def draw_images(position_list, img_up, img_down, img_up_thresh, img_down_thresh)
 
 if __name__ == "__main__":
     try:
-        df = pd.read_csv(f"vid_target_positions.csv")
+        df = pd.read_csv(f"bounding_box.csv")
         position_list = df[["box_num", "x1", "y1", "x2", "y2"]].values.tolist()
         counter = df.index[-1] + 2
     except:
@@ -125,7 +122,7 @@ if __name__ == "__main__":
     cv2.setMouseCallback("Targets up", draw_reactangle_with_drag)
 
     while True:
-        img_up = cv2.imread(f'targets_up.jpg')
+        img_up = cv2.imread(f'bounding_box.jpg')
         # img_up = apply_adaptive_threshold(img_up, "", write_img=False)
         img_down = cv2.imread(f'targets_down.jpg')
         img_up_thresh = apply_adaptive_threshold(img_up, "", write_img=False)

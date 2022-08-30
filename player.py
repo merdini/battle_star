@@ -60,10 +60,10 @@ class Player:
               threshold = (up_cnt + down_cnt) // 2 
               if up_cnt > down_cnt:
                   sign = '>'
-                  threshold -= 15
+                  threshold -= 10
               else:
                   sign = '<'
-                  threshold += 15
+                  threshold += 10
 
               if eval(f'{nonzero_count} {sign} {threshold}'):
                   self.up_targets_this_frame += 1
@@ -85,10 +85,10 @@ class Player:
           threshold = (up_cnt + down_cnt) // 2 - 10
           if up_cnt > down_cnt:
               sign = '>'
-              threshold -= 15
+              threshold -= 10
           else:
               sign = '<'
-              threshold += 15
+              threshold += 10
 
           if eval(f'{nonzero_count} {sign} {threshold}'):
             self.up_targets_this_frame += 1

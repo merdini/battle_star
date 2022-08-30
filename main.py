@@ -50,19 +50,21 @@ def main(source, dev=False):
     y2 = y1 + 50
     
     # cv2.rectangle(bg, (x1, y1), (x2, y2), color, 2)
-    cvzone.putTextRect(bg, f"{rows['name']:15}: {rows['shot']:4} {rows['time']:.2f} sec", (x1, y2-3), scale=2, thickness=2, offset=0, colorR=(153,170,255))
+    cvzone.putTextRect(bg, f"{rows['name']}: {rows['shot']} {rows['time']} sec", (x1, y2-3), scale=3, thickness=3, 
+    offset=0, colorR=(0,255,0))
 
-  cvzone.putTextRect(bg, f"This month best shooters", (screen_width//2 + 300, 50), scale=3, thickness=3, offset=0, colorR=color)
+  cvzone.putTextRect(bg, f"This month best shooters", (screen_width//2 + 350, 50), scale=3, thickness=3, offset=0, colorR=color)
   for idx, rows in monthly_records.iterrows():
     if idx > 9:
       break
-    x1 = screen_width // 2 +300
+    x1 = screen_width // 2 + 350
     y1 = idx  *  50 + 50
     x2 = x1 + 700
     y2 = y1 + 50
     
     # cv2.rectangle(bg, (x1, y1), (x2, y2), color, 2)
-    cvzone.putTextRect(bg, f"{rows['name']:15}: {rows['shot']:4} {rows['time']:.2f} sec", (x1, y2-3), scale=2, thickness=2, offset=0, colorR=(153,170,255))
+    cvzone.putTextRect(bg, f"{rows['name']}: {rows['shot']} {rows['time']} sec", (x1, y2-3), scale=3, thickness=3, 
+    offset=0, colorR=(0,255,0))
 
   for region in region_list:
       players_list.append(Player(Region(region[1:])))

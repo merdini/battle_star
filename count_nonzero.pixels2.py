@@ -74,7 +74,7 @@ def get_nonzero_pixel_thresholds(df, img, column_name):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv(f"vid_target_positions.csv", dtype='Int16')
+    df = pd.read_csv(f"bounding_box.csv", dtype='Int16')
     df["up_nonzero_cnt"] = float('Inf')
     df["down_nonzero_cnt"] = float('-Inf')
     last_frame_no = 100
